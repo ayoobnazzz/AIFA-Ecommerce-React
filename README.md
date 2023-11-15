@@ -48,10 +48,4 @@ $ yarn dev
 $ yarn build
 ```
 
-## How to add products or perform CRUD operations for Admin
-1. Navigate to your site to `/signup`
-2. Create an account for yourself
-3. Go to your firestore collection `users collection` and edit the account you've just created. Change the role from `USER` to `ADMIN`.
-4. Reload or sigin again to see the changes. 
-
 
