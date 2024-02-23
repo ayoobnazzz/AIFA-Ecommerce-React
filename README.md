@@ -54,5 +54,4 @@ $ yarn build
 3. Go to your firestore collection `users collection` and edit the account you've just created. Change the role from `USER` to `ADMIN`.
 4. Reload or sigin again to see the changes. 
 
-**Firebase Admin to be integrated soon**
 
