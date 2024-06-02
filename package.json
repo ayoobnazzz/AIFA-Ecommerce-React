@@ -2,12 +2,9 @@
   "name": "ecommerce-react",
   "version": "1.2.0",
   "main": "index.js",
-  "author": "Julius Guevarra",
+  "author": "Ayoob Nazeer",
   "keywords": [
-    "react-webpack",
-    "boilerplate",
-    "react-webpack-boilerplate",
-    "react-boilerplate"
+    "react-webpack"
   ],
   "license": "MIT",
   "scripts": {
