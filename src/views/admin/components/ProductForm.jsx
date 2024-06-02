@@ -14,10 +14,10 @@ import * as Yup from 'yup';
 
 // Default brand names that I used. You can use what you want
 const brandOptions = [
-  { value: 'Salt Maalat', label: 'Salt Maalat' },
-  { value: 'Betsin Maalat', label: 'Betsin Maalat' },
-  { value: 'Sexbomb', label: 'Sexbomb' },
-  { value: 'Black Kibal', label: 'Black Kibal' }
+  { value: 'Baby Blossom', label: 'Baby Blossom' },
+  { value: 'Happy Huggies', label: 'Happy Huggies' },
+  { value: 'CuddleCloud', label: 'CuddleCloud' },
+  { value: 'Gentle Beginnings', label: 'Gentle Beginnings' }
 ];
 
 const FormSchema = Yup.object().shape({
@@ -40,8 +40,8 @@ const FormSchema = Yup.object().shape({
     .of(Yup.string())
     .min(1, 'Please enter at least 1 keyword for this product.'),
   sizes: Yup.array()
-    .of(Yup.number())
-    .min(1, 'Please enter a size for this product.'),
+    .of(Yup.string())
+    .min(1, 'Size is Required for this product'),
   isFeatured: Yup.boolean(),
   isRecommended: Yup.boolean(),
   availableColors: Yup.array()
@@ -175,11 +175,12 @@ const ProductForm = ({ product, onSubmit, isLoading }) => {
                     defaultValue={values.keywords.map((key) => ({ value: key, label: key }))}
                     name="sizes"
                     iid="sizes"
-                    type="number"
+                    // type="number"
+                    options={[{ value: "Newborn Up to 5 lbs", label: "Newborn Up to 5 lbs" }, { value: "Newborn Up to 5 - 8 lbs", label: "Newborn Up to 5 - 8 lbs" }, { value: "Infant 0 - 3 months", label: "Infant 0 - 3 months" }]}
                     isMulti
                     disabled={isLoading}
                     placeholder="Create/Select Sizes"
-                    label="* Sizes (Millimeter)"
+                    label="* Sizes"
                   />
                 </div>
               </div>
