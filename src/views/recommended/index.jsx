@@ -4,7 +4,7 @@ import { useDocumentTitle, useRecommendedProducts, useScrollTop } from '@/hooks'
 import React from 'react';
 
 const RecommendedProducts = () => {
-  useDocumentTitle('Recommended Products | Salinaka');
+  useDocumentTitle('Recommended Products | AIFA - Baby Cloud');
   useScrollTop();
 
   const {

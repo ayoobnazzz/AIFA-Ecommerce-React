@@ -5,7 +5,7 @@
   background: $off-white;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   @include mobile {
     padding: 0;
@@ -25,15 +25,15 @@
   object-fit: contain;
 }
 
-.footer-col-1 {
-  flex-basis: 40%; 
+// .footer-col-1 {
+//   flex-basis: 40%; 
 
-  @include mobile {
-    flex-basis: none;
-    order: 1;
-    text-align: center;
-  }
-}
+//   @include mobile {
+//     flex-basis: none;
+//     order: 1;
+//     text-align: center;
+//   }
+// }
 
 .footer-col-2 {
   padding: 3rem 0;
@@ -59,11 +59,11 @@
   }
 }
 
-@include mobile {
+// @include mobile {
   .footer-col-1,
   .footer-col-2,
   .footer-col-3 {
     width: 100%;
     margin: $s-size 0;
   }
-}
+// }

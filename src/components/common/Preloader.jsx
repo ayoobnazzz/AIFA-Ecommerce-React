@@ -6,7 +6,7 @@ const Preloader = () => (
       <circle cx="20.62" cy="20.62" r="20.62" />
       <circle className="fill-white" cx="29.97" cy="14.93" r="6.58" />
     </svg>
-    <img alt="Salinaka logo wordmark" src="/Logo.png" />
+    <img alt="AIFA - Baby Cloud" src="/Logo.png" />
   </div>
 );
 

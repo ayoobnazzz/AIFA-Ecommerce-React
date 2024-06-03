@@ -100,6 +100,16 @@ const AppRouter = () => (
           component={view.EditProduct}
           path={`${ROUTES.EDIT_PRODUCT}/:id`}
         />
+        <PublicRoute
+          component={view.RecommendedProducts}
+          exact
+          path={ROUTES.CONTACT_US}
+        />
+        <PublicRoute
+          component={view.FeaturedProducts}
+          exact
+          path={ROUTES.ABOUT_US}
+        />
         <PublicRoute component={view.PageNotFound} />
       </Switch>
       <Footer />

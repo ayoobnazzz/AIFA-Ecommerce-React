@@ -31,7 +31,7 @@ const FormSchema = Yup.object().shape({
 });
 
 const EditProfile = () => {
-  useDocumentTitle('Edit Account | Salinaka');
+  useDocumentTitle('Edit Account | AIFA - Baby Cloud');
   useScrollTop();
 
   const modal = useModal();

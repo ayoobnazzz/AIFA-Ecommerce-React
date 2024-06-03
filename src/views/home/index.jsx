@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 
 
 const Home = () => {
-  useDocumentTitle('Salinaka | Home');
+  useDocumentTitle('AIFA - Baby Cloud | Home');
   useScrollTop();
 
   const {
@@ -32,13 +32,12 @@ const Home = () => {
         <div className="banner">
           <div className="banner-desc">
             <h1 className="text-thin">
-              <strong>See</strong>
-              &nbsp;everything with&nbsp;
-              <strong>Clarity</strong>
+              <strong>Love for</strong>
+              &nbsp;Your Little&nbsp;
+              <strong>Ones</strong>
             </h1>
             <p>
-              Buying eyewear should leave you happy and good-looking, with money in your pocket.
-              Glasses, sunglasses, and contacts—we’ve got your eyes covered.
+            Discover our curated collection of cozy, stylish, and high-quality baby clothing at Tiny Treasures Baby Boutique.
             </p>
             <br />
             <Link to={SHOP} className="button">
