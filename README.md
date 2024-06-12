@@ -1,6 +1,9 @@
 # React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Check out the application here
+
+![image](https://github.com/ayoobnazzz/AIFA-Ecommerce-React/assets/59804587/9b6071c6-1b26-4506-80f1-3ef4806f31c1)
+
 
 Currently, two official plugins are available:
 
