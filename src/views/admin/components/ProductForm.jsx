@@ -2,7 +2,7 @@
 import { CheckOutlined, LoadingOutlined } from '@ant-design/icons';
 import { ImageLoader } from '@/components/common';
 import {
-  CustomColorInput, CustomCreatableSelect, CustomInput, CustomTextarea
+  CustomCreatableSelect, CustomInput, CustomTextarea
 } from '@/components/formik';
 import {
   Field, FieldArray, Form, Formik
@@ -44,10 +44,7 @@ const FormSchema = Yup.object().shape({
     .of(Yup.string())
     .min(1, 'Size is Required for this product'),
   isFeatured: Yup.boolean(),
-  isRecommended: Yup.boolean(),
-  availableColors: Yup.array()
-    .of(Yup.string().required())
-    .min(1, 'Please add a default color for this product.')
+  isRecommended: Yup.boolean()
 });
 
 const ProductForm = ({ product, onSubmit, isLoading }) => {
@@ -60,8 +57,7 @@ const ProductForm = ({ product, onSubmit, isLoading }) => {
     keywords: product?.keywords || [],
     sizes: product?.sizes || [],
     isFeatured: product?.isFeatured || false,
-    isRecommended: product?.isRecommended || false,
-    availableColors: product?.availableColors || []
+    isRecommended: product?.isRecommended || false
   };
 
   const {
@@ -174,24 +170,17 @@ const ProductForm = ({ product, onSubmit, isLoading }) => {
                 &nbsp;
                 <div className="product-form-field">
                   <CustomCreatableSelect
-                    defaultValue={values.keywords.map((key) => ({ value: key, label: key }))}
+                    defaultValue={values.sizes.map((key) => ({ value: key, label: key }))}
                     name="sizes"
                     iid="sizes"
                     // type="number"
-                    options={[{ value: "Newborn Up to 5 lbs", label: "Newborn Up to 5 lbs" }, { value: "Newborn Up to 5 - 8 lbs", label: "Newborn Up to 5 - 8 lbs" }, { value: "Infant 0 - 3 months", label: "Infant 0 - 3 months" }]}
+                    options={[{ value: "Newborn Up to 5 lbs", label: "Newborn Up to 5 lbs" }, { value: "Newborn Up to 5 - 8 lbs", label: "Newborn Up to 5 - 8 lbs" }, { value: "Infant 0 - 3 months", label: "Infant 0 - 3 months" }, { value: "Infant 3 - 6 months", label: "Infant 3 - 6 months" }, { value: "Infant 6 - 12 months", label: "Infant 6 - 12 months" }, { value: "Infant 12 - 18 months", label: "Infant 12 - 18 months" }, { value: "Infant 18 - 24 months", label: "Infant 18 - 24 months" }]}
                     isMulti
                     disabled={isLoading}
                     placeholder="Create/Select Sizes"
                     label="* Sizes"
                   />
                 </div>
-              </div>
-              <div className="product-form-field">
-                <FieldArray
-                  name="availableColors"
-                  disabled={isLoading}
-                  component={CustomColorInput}
-                />
               </div>
               <div className="product-form-field">
                 <span className="d-block padding-s">Image Collection</span>
@@ -322,7 +311,7 @@ ProductForm.propTypes = {
     image: PropType.string,
     isFeatured: PropType.bool,
     isRecommended: PropType.bool,
-    availableColors: PropType.arrayOf(PropType.string)
+    // availableColors: PropType.arrayOf(PropType.string)
   }).isRequired,
   onSubmit: PropType.func.isRequired,
   isLoading: PropType.bool.isRequired

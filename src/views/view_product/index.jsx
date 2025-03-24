@@ -1,5 +1,5 @@
 import { ArrowLeftOutlined, LoadingOutlined } from '@ant-design/icons';
-import { ColorChooser, ImageLoader, MessageDisplay } from '@/components/common';
+import { ImageLoader, MessageDisplay } from '@/components/common';
 import { ProductShowcaseGrid } from '@/components/product';
 import { RECOMMENDED_PRODUCTS, SHOP } from '@/constants/routes';
 import { displayMoney } from '@/helpers/utils';
@@ -23,7 +23,6 @@ const ViewProduct = () => {
 
   const [selectedImage, setSelectedImage] = useState(product?.image || '');
   const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
 
   const {
     recommendedProducts,
@@ -31,7 +30,6 @@ const ViewProduct = () => {
     isLoading: isLoadingFeatured,
     error: errorFeatured
   } = useRecommendedProducts(6);
-  const colorOverlay = useRef(null);
 
   useEffect(() => {
     setSelectedImage(product?.image);
@@ -41,15 +39,10 @@ const ViewProduct = () => {
     setSelectedSize(newValue.value);
   };
 
-  const onSelectedColorChange = (color) => {
-    setSelectedColor(color);
-    if (colorOverlay.current) {
-      colorOverlay.current.value = color;
-    }
-  };
+
 
   const handleAddToBasket = () => {
-    addToBasket({ ...product, selectedColor, selectedSize: selectedSize || product.sizes[0] });
+    addToBasket({ ...product, selectedSize: selectedSize || product.sizes[0] });
   };
 
   return (
@@ -91,7 +84,6 @@ const ViewProduct = () => {
               </div>
             )}
             <div className="product-modal-image-wrapper">
-              {selectedColor && <input type="color" disabled ref={colorOverlay} id="color-overlay" />}
               <ImageLoader
                 alt={product.name}
                 className="product-modal-image"
@@ -119,17 +111,6 @@ const ViewProduct = () => {
                 />
               </div>
               <br />
-              {product.availableColors.length >= 1 && (
-                <div>
-                  <span className="text-subtle">Choose Color</span>
-                  <br />
-                  <br />
-                  <ColorChooser
-                    availableColors={product.availableColors}
-                    onSelectedColorChange={onSelectedColorChange}
-                  />
-                </div>
-              )}
               <h1>{displayMoney(product.price)}</h1>
               <div className="product-modal-action">
                 <button

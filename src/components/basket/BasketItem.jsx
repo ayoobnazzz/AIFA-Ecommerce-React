@@ -42,16 +42,6 @@ const BasketItem = ({ product }) => {
                 mm
               </h5>
             </div>
-            <div>
-              <span className="spec-title">Color</span>
-              <div style={{
-                backgroundColor: product.selectedColor || product.availableColors[0],
-                width: '15px',
-                height: '15px',
-                borderRadius: '50%'
-              }}
-              />
-            </div>
           </div>
         </div>
         <div className="basket-item-price">
@@ -80,14 +70,12 @@ BasketItem.propTypes = {
     description: PropType.string,
     keywords: PropType.arrayOf(PropType.string),
     selectedSize: PropType.string,
-    selectedColor: PropType.string,
     imageCollection: PropType.arrayOf(PropType.string),
     sizes: PropType.arrayOf(PropType.number),
     image: PropType.string,
     imageUrl: PropType.string,
     isFeatured: PropType.bool,
-    isRecommended: PropType.bool,
-    availableColors: PropType.arrayOf(PropType.string)
+    isRecommended: PropType.bool
   }).isRequired
 };
 
