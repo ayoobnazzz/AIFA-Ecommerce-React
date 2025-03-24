@@ -15,7 +15,6 @@ export const getUser = (uid) => ({
   payload: uid
 });
 
-// different from registerUser -- only inserted in admins' users array not in profile array
 export const addUser = (user) => ({
   type: ADD_USER,
   payload: user

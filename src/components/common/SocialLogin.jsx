@@ -2,7 +2,7 @@ import { FacebookOutlined, GithubFilled, GoogleOutlined } from '@ant-design/icon
 import PropType from 'prop-types';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { signInWithFacebook, signInWithGithub, signInWithGoogle } from '@/redux/actions/authActions';
+import { signInWithFacebook, signInWithGoogle } from '@/redux/actions/authActions';
 
 const SocialLogin = ({ isLoading }) => {
   const dispatch = useDispatch();
@@ -13,10 +13,6 @@ const SocialLogin = ({ isLoading }) => {
 
   const onSignInWithFacebook = () => {
     dispatch(signInWithFacebook());
-  };
-
-  const onSignInWithGithub = () => {
-    dispatch(signInWithGithub());
   };
 
   return (
@@ -39,15 +35,6 @@ const SocialLogin = ({ isLoading }) => {
       >
         <GoogleOutlined />
         Continue with Google
-      </button>
-      <button
-        className="button auth-provider-button provider-github"
-        disabled={isLoading}
-        onClick={onSignInWithGithub}
-        type="button"
-      >
-        <GithubFilled />
-        Continue with GitHub
       </button>
     </div>
   );
