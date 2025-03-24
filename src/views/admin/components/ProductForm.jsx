@@ -11,6 +11,7 @@ import { useFileHandler } from '@/hooks';
 import PropType from 'prop-types';
 import React from 'react';
 import * as Yup from 'yup';
+import { CloseOutlined } from '@ant-design/icons';
 
 // Default brand names that I used. You can use what you want
 const brandOptions = [
@@ -71,19 +72,20 @@ const ProductForm = ({ product, onSubmit, isLoading }) => {
   } = useFileHandler({ image: {}, imageCollection: product?.imageCollection || [] });
 
   const onSubmitForm = (form) => {
-    if (imageFile.image.file || product.imageUrl) {
+    // Use optional chaining for product.image
+    const hasThumbnail = imageFile.image.file || product?.image;
+    const hasCollectionImages = imageFile.imageCollection?.length > 0;
+  
+    if (hasThumbnail || hasCollectionImages) {
       onSubmit({
         ...form,
         quantity: 1,
-        // due to firebase function billing policy, let's add lowercase version
-        // of name here instead in firebase functions
         name_lower: form.name.toLowerCase(),
         dateAdded: new Date().getTime(),
-        image: imageFile?.image?.file || product.imageUrl,
-        imageCollection: imageFile.imageCollection
+        image: imageFile?.image?.file || product?.image || '',
+        imageCollection: imageFile.imageCollection || []
       });
     } else {
-      // eslint-disable-next-line no-alert
       alert('Product thumbnail image is required.');
     }
   };
@@ -209,29 +211,22 @@ const ProductForm = ({ product, onSubmit, isLoading }) => {
                 )}
               </div>
               <div className="product-form-collection">
-                <>
-                  {imageFile.imageCollection.length >= 1 && (
-                    imageFile.imageCollection.map((image) => (
-                      <div
-                        className="product-form-collection-image"
-                        key={image.id}
-                      >
-                        <ImageLoader
-                          alt=""
-                          src={image.url}
-                        />
-                        <button
-                          className="product-form-delete-image"
-                          onClick={() => removeImage({ id: image.id, name: 'imageCollection' })}
-                          title="Delete Image"
-                          type="button"
-                        >
-                          <i className="fa fa-times-circle" />
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </>
+                {imageFile.imageCollection.map((image) => (
+                  <div className="product-form-collection-image" key={image.id}>
+                    <ImageLoader
+                      alt=""
+                      src={image.url}
+                    />
+                    <button
+                      className="product-form-delete-image"
+                      onClick={() => removeImage({ id: image.id, name: 'imageCollection' })}
+                      title="Delete Image"
+                      type="button"
+                    >
+                      <CloseOutlined />
+                    </button>
+                  </div>
+                ))}
               </div>
               <br />
               <div className="d-flex">
@@ -325,7 +320,6 @@ ProductForm.propTypes = {
     imageCollection: PropType.arrayOf(PropType.object),
     sizes: PropType.arrayOf(PropType.string),
     image: PropType.string,
-    imageUrl: PropType.string,
     isFeatured: PropType.bool,
     isRecommended: PropType.bool,
     availableColors: PropType.arrayOf(PropType.string)
