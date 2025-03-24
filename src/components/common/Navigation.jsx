@@ -9,9 +9,7 @@ import {
 import UserAvatar from '@/views/account/components/UserAvatar';
 import BasketToggle from '../basket/BasketToggle';
 import Badge from './Badge';
-import FiltersToggle from './FiltersToggle';
 import MobileNavigation from './MobileNavigation';
-import SearchBar from './SearchBar';
 
 const Navigation = () => {
   const navbar = useRef(null);
@@ -80,15 +78,6 @@ const Navigation = () => {
 
 
       </ul>
-      {(pathname === ROUTE.SHOP || pathname === ROUTE.SEARCH) && (
-        <FiltersToggle>
-          <button className="button-muted button-small" type="button">
-            Filters &nbsp;
-            <FilterOutlined />
-          </button>
-        </FiltersToggle>
-      )}
-      <SearchBar />
       <ul className="navigation-menu">
         <li className="navigation-menu-item">
           <BasketToggle>

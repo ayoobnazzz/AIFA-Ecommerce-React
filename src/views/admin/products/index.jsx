@@ -27,6 +27,7 @@ const Products = () => {
         totalProductsCount={store.products.total}
       />
       <div className="product-admin-items">
+        
         <ProductList {...store}>
           <AppliedFilters filter={store.filter} />
           <ProductsTable filteredProducts={store.filteredProducts} />
