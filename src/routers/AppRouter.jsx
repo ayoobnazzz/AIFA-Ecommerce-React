@@ -101,12 +101,12 @@ const AppRouter = () => (
           path={`${ROUTES.EDIT_PRODUCT}/:id`}
         />
         <PublicRoute
-          component={view.RecommendedProducts}
+          component={view.ContactUs}
           exact
           path={ROUTES.CONTACT_US}
         />
         <PublicRoute
-          component={view.FeaturedProducts}
+          component={view.AboutUs}
           exact
           path={ROUTES.ABOUT_US}
         />
