@@ -172,28 +172,28 @@ class Firebase {
         }, 15000);
   
         try {
-          // Split search term into individual words and n-grams
-          const searchWords = [
-            searchTerm,
-            ...searchTerm.split(/[\s-]+/g) // Split by spaces and hyphens
-          ].filter((v, i, a) => a.indexOf(v) === i);
-  
-          // Create queries for all searchable fields
+          const searchWords = searchTerm.split(/[\s-]+/g).filter(w => w.length > 2);
+          
+          // Create separate queries for each search condition
           const queries = [
-            // Name partial match
-            productsRef
-              .where("name_lower", ">=", searchTerm)
-              .where("name_lower", "<=", searchTerm + "\uf8ff")
-              .limit(12),
-  
-            // Keyword array match (full word matches)
-            productsRef
-              .where("keywords", "array-contains-any", searchWords)
-              .limit(12)
+            // Name search
+            productsRef.where("name_lower", ">=", searchTerm)
+                      .where("name_lower", "<=", searchTerm + "\uf8ff"),
+            
+            // Brand search
+            productsRef.where("brand_lower", ">=", searchTerm)
+                      .where("brand_lower", "<=", searchTerm + "\uf8ff"),
+            
+            // Description search
+            productsRef.where("description_lower", ">=", searchTerm)
+                      .where("description_lower", "<=", searchTerm + "\uf8ff"),
+            
+            // Keywords search
+            productsRef.where("keywords", "array-contains-any", searchWords)
           ];
   
-          // Execute all queries
-          const snapshots = await Promise.all(queries.map(q => q.get()));
+          // Execute all queries in parallel
+          const snapshots = await Promise.all(queries.map(q => q.limit(25).get()));
           
           // Merge and deduplicate results
           const mergedProducts = [];

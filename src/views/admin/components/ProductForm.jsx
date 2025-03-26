@@ -68,16 +68,23 @@ const ProductForm = ({ product, onSubmit, isLoading }) => {
   } = useFileHandler({ image: {}, imageCollection: product?.imageCollection || [] });
 
   const onSubmitForm = (form) => {
-    // Generate keywords from product name
-    const nameKeywords = form.name
-      .toLowerCase()
+    // Generate keywords from product data
+    const generateKeywords = (text) => 
+      text.toLowerCase()
       .split(/[\s-]+/g) // Split by spaces and hyphens
-      .filter(word => word.length > 2); // Filter out short words
+      .filter(word => word.length > 2); // Ignore short words
   
-    // Merge with existing keywords and remove duplicates
+    const nameKeywords = generateKeywords(form.name);
+    const descKeywords = generateKeywords(form.description);
+    const brandKeywords = generateKeywords(form.brand);
+    const userKeywords = form.keywords.map(k => k.toLowerCase());
+  
+    // Merge all keywords and remove duplicates
     const mergedKeywords = [...new Set([
       ...nameKeywords,
-      ...form.keywords.map(k => k.toLowerCase())
+      ...descKeywords,
+      ...brandKeywords,
+      ...userKeywords
     ])];
   
     // Use optional chaining for product.image
@@ -87,9 +94,11 @@ const ProductForm = ({ product, onSubmit, isLoading }) => {
     if (hasThumbnail || hasCollectionImages) {
       onSubmit({
         ...form,
-        keywords: mergedKeywords, // Use merged keywords
+        keywords: mergedKeywords,
         quantity: 1,
         name_lower: form.name.toLowerCase(),
+        brand_lower: form.brand.toLowerCase(),
+        description_lower: form.description.toLowerCase(),
         dateAdded: new Date().getTime(),
         image: imageFile?.image?.file || product?.image || '',
         imageCollection: imageFile.imageCollection || []
