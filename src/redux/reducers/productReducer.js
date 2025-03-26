@@ -2,7 +2,7 @@ import {
   ADD_PRODUCT_SUCCESS,
   CLEAR_SEARCH_STATE, EDIT_PRODUCT_SUCCESS,
   GET_PRODUCTS_SUCCESS, REMOVE_PRODUCT_SUCCESS,
-  SEARCH_PRODUCT_SUCCESS
+  SEARCH_PRODUCT_SUCCESS, SEARCH_PRODUCT
 } from '@/constants/constants';
 
 const initState = {
@@ -18,6 +18,11 @@ export default (state = {
   searchedProducts: initState
 }, action) => {
   switch (action.type) {
+    case SEARCH_PRODUCT: // Add this case to reset search state when new search starts
+    return {
+      ...state,
+      searchedProducts: initState
+    };
     case GET_PRODUCTS_SUCCESS:
       return {
         ...state,
@@ -36,8 +41,8 @@ export default (state = {
         searchedProducts: {
           lastRefKey: action.payload.lastKey,
           total: action.payload.total,
-          items: [...state.searchedProducts.items, ...action.payload.products]
-        }
+          items: action.payload.products
+       }
       };
     case CLEAR_SEARCH_STATE:
       return {

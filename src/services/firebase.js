@@ -161,63 +161,60 @@ class Firebase {
 
   searchProducts = (searchKey) => {
     let didTimeout = false;
-
+    const searchTerm = searchKey.toLowerCase().trim();
+  
     return new Promise((resolve, reject) => {
       (async () => {
         const productsRef = this.db.collection("products");
-
         const timeout = setTimeout(() => {
           didTimeout = true;
           reject(new Error("Request timeout, please try again"));
         }, 15000);
-
+  
         try {
-          const searchedNameRef = productsRef
-            .orderBy("name_lower")
-            .where("name_lower", ">=", searchKey)
-            .where("name_lower", "<=", `${searchKey}\uf8ff`)
-            .limit(12);
-          const searchedKeywordsRef = productsRef
-            .orderBy("dateAdded", "desc")
-            .where("keywords", "array-contains-any", searchKey.split(" "))
-            .limit(12);
-
-          // const totalResult = await totalQueryRef.get();
-          const nameSnaps = await searchedNameRef.get();
-          const keywordsSnaps = await searchedKeywordsRef.get();
-          // const total = totalResult.docs.length;
-
+          // Split search term into individual words and n-grams
+          const searchWords = [
+            searchTerm,
+            ...searchTerm.split(/[\s-]+/g) // Split by spaces and hyphens
+          ].filter((v, i, a) => a.indexOf(v) === i);
+  
+          // Create queries for all searchable fields
+          const queries = [
+            // Name partial match
+            productsRef
+              .where("name_lower", ">=", searchTerm)
+              .where("name_lower", "<=", searchTerm + "\uf8ff")
+              .limit(12),
+  
+            // Keyword array match (full word matches)
+            productsRef
+              .where("keywords", "array-contains-any", searchWords)
+              .limit(12)
+          ];
+  
+          // Execute all queries
+          const snapshots = await Promise.all(queries.map(q => q.get()));
+          
+          // Merge and deduplicate results
+          const mergedProducts = [];
+          const seenIds = new Set();
+  
+          snapshots.forEach(snapshot => {
+            snapshot.forEach(doc => {
+              if (!seenIds.has(doc.id)) {
+                seenIds.add(doc.id);
+                mergedProducts.push({ id: doc.id, ...doc.data() });
+              }
+            });
+          });
+  
           clearTimeout(timeout);
           if (!didTimeout) {
-            const searchedNameProducts = [];
-            const searchedKeywordsProducts = [];
-            let lastKey = null;
-
-            if (!nameSnaps.empty) {
-              nameSnaps.forEach((doc) => {
-                searchedNameProducts.push({ id: doc.id, ...doc.data() });
-              });
-              lastKey = nameSnaps.docs[nameSnaps.docs.length - 1];
-            }
-
-            if (!keywordsSnaps.empty) {
-              keywordsSnaps.forEach((doc) => {
-                searchedKeywordsProducts.push({ id: doc.id, ...doc.data() });
-              });
-            }
-
-            // MERGE PRODUCTS
-            const mergedProducts = [
-              ...searchedNameProducts,
-              ...searchedKeywordsProducts,
-            ];
-            const hash = {};
-
-            mergedProducts.forEach((product) => {
-              hash[product.id] = product;
+            resolve({
+              products: mergedProducts,
+              total: mergedProducts.length,
+              lastKey: null
             });
-
-            resolve({ products: Object.values(hash), lastKey });
           }
         } catch (e) {
           if (didTimeout) return;

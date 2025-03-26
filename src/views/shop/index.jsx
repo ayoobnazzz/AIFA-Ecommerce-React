@@ -1,19 +1,33 @@
-/* eslint-disable react/jsx-props-no-spreading */
+import { useParams } from 'react-router-dom';
+import { useDidMount } from '@/hooks';
 import { AppliedFilters, ProductGrid, ProductList } from '@/components/product';
 import { SearchBar, FiltersToggle } from '@/components/common';
 import { FilterOutlined } from '@ant-design/icons';
 import { useDocumentTitle, useScrollTop } from '@/hooks';
-import React from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { shallowEqual, useSelector, useDispatch } from 'react-redux';
 import { selectFilter } from '@/selectors/selector';
 // import SearchBar from './SearchBar';
 
 const Shop = () => {
+  const { searchTerm } = useParams();
+  const dispatch = useDispatch();
   useDocumentTitle('Shop | AIFA - Baby Cloud');
   useScrollTop();
 
+  useDidMount(() => {
+    if (searchTerm) {
+      dispatch(searchProduct(searchTerm));
+    }
+  });
+
   const store = useSelector((state) => ({
-    filteredProducts: selectFilter(state.products.items, state.filter),
+    filteredProducts: selectFilter(
+      state.products.searchedProducts.items.length > 0 
+        ? state.products.searchedProducts.items
+        : state.products.items,
+      state.filter
+    ),
     products: state.products,
     requestStatus: state.app.requestStatus,
     isLoading: state.app.loading
@@ -23,12 +37,12 @@ const Shop = () => {
     <main className="content">
       <section className="product-list-wrapper">
         <AppliedFilters filteredProductsCount={store.filteredProducts.length} />
-        <div style={{display: "flex" }}>
+        <div style={{display: "flex", marginBottom: "4rem" }}>
 
       <div>
         <FiltersToggle>
           <button className="button-muted button-small" type="button">
-            Filters &nbsp;
+            Filters
             <FilterOutlined />
           </button>
         </FiltersToggle>

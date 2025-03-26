@@ -44,6 +44,7 @@ function* productSaga({ type, payload }) {
         yield initRequest();
         const state = yield select();
         const result = yield call(firebase.getProducts, payload);
+        console.log(result)
 
         if (result.products.length === 0) {
           handleError('No items found.');
@@ -82,11 +83,24 @@ function* productSaga({ type, payload }) {
           }));
         }
 
-        const product = {
-          ...payload,
-          image: downloadURL,
-          imageCollection: [image, ...images]
-        };
+        const nameKeywords = payload.name
+        .toLowerCase()
+        .split(/[\s-]+/g)
+        .filter(word => word.length > 2);
+  
+      const keywords = [
+        ...new Set([
+          ...nameKeywords,
+          ...(payload.keywords || []).map(k => k.toLowerCase())
+        ])
+      ];
+
+      const product = {
+        ...payload,
+        keywords, // Add generated keywords
+        image: downloadURL,
+        imageCollection: [image, ...images]
+      };
 
         yield call(firebase.addProduct, key, product);
         yield put(addProductSuccess({
@@ -181,7 +195,7 @@ function* productSaga({ type, payload }) {
 
         const state = yield select();
         const result = yield call(firebase.searchProducts, payload.searchKey);
-
+console.log(result)
         if (result.products.length === 0) {
           yield handleError({ message: 'No product found.' });
           yield put(clearSearchState());

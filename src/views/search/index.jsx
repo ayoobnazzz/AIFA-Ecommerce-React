@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { LoadingOutlined } from '@ant-design/icons';
-import { Boundary, MessageDisplay } from '@/components/common';
-import { ProductGrid } from '@/components/product';
+import { LoadingOutlined, FilterOutlined } from '@ant-design/icons';
+import { Boundary, MessageDisplay, SearchBar, FiltersToggle } from '@/components/common';
+import { AppliedFilters, ProductGrid } from '@/components/product';
 import { useDidMount } from '@/hooks';
 import PropType from 'prop-types';
 import React, { useEffect } from 'react';
@@ -44,21 +44,37 @@ const Search = ({ match }) => {
   if (!store.requestStatus && !store.isLoading) {
     return (
       <Boundary>
-        <main className="content">
-          <section className="product-list-wrapper product-list-search">
-            {!store.requestStatus && (
-              <div className="product-list-header">
-                <div className="product-list-header-title">
-                  <h5>
-                    {`Found ${store.products.length} ${store.products.length > 1 ? 'products' : 'product'} with keyword ${searchKey}`}
-                  </h5>
-                </div>
+      <main className="content">
+        <section className="product-list-wrapper">
+          <AppliedFilters filteredProductsCount={store.products.length} />
+          <div style={{ display: "flex", marginBottom: "4rem" }}>
+            <div>
+              <FiltersToggle>
+                <button className="button-muted button-small" type="button">
+                  Filters
+                  <FilterOutlined />
+                </button>
+              </FiltersToggle>
+            </div>
+            <div>
+              <SearchBar initialValue={searchKey} />
+            </div>
+          </div>
+
+          {!store.requestStatus && (
+            <div className="product-list-header">
+              <div className="product-list-header-title">
+                <h5>
+                  {`Found ${store.products.length} ${store.products.length > 1 ? 'products' : 'product'} with keyword "${searchKey}"`}
+                </h5>
               </div>
-            )}
-            <ProductGrid products={store.products} />
-          </section>
-        </main>
-      </Boundary>
+            </div>
+          )}
+          
+          <ProductGrid products={store.products} />
+        </section>
+      </main>
+    </Boundary>
     );
   }
 

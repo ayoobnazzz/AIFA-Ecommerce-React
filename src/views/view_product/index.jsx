@@ -100,7 +100,7 @@ const ViewProduct = () => {
               <div className="divider" />
               <br />
               <div>
-                <span className="text-subtle">Lens Width and Frame Size</span>
+                <span className="text-subtle">Size</span>
                 <br />
                 <br />
                 <Select

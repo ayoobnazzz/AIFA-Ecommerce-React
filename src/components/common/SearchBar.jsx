@@ -1,12 +1,12 @@
 /* eslint-disable react/no-array-index-key */
 import { SearchOutlined } from '@ant-design/icons';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { clearRecentSearch, removeSelectedRecent } from '@/redux/actions/filterActions';
 
-const SearchBar = () => {
-  const [searchInput, setSearchInput] = useState('');
+const SearchBar = ({ initialValue = '' }) => {
+  const [searchInput, setSearchInput] = useState(initialValue);
   const { filter, isLoading } = useSelector((state) => ({
     filter: state.filter,
     isLoading: state.app.loading
@@ -22,17 +22,18 @@ const SearchBar = () => {
     setSearchInput(val);
   };
 
+  useEffect(() => {
+    setSearchInput(initialValue);
+  }, [initialValue]);
+
   const onKeyUp = (e) => {
     if (e.keyCode === 13) {
-      // dispatch(setTextFilter(searchInput));
-      e.target.blur();
-      searchbarRef.current.classList.remove('is-open-recent-search');
-
-      if (isMobile) {
+      const searchTerm = searchInput.trim();
+      if (searchTerm) {
+        history.push(`/search/${encodeURIComponent(searchTerm.toLowerCase())}`);
+      } else {
         history.push('/');
       }
-
-      history.push(`/search/${searchInput.trim().toLowerCase()}`);
     }
   };
 
