@@ -2,7 +2,7 @@
 import { BasketItem, BasketToggle } from '@/components/basket';
 import { Boundary, Modal } from '@/components/common';
 import { CHECKOUT_STEP_1 } from '@/constants/routes';
-import firebase from 'firebase/firebase';
+import firebase from '@/services/firebase'; 
 import { calculateTotal, displayMoney } from '@/helpers/utils';
 import { useDidMount, useModal } from '@/hooks';
 import React, { useEffect } from 'react';
@@ -22,15 +22,18 @@ const Basket = () => {
   const didMount = useDidMount();
 
   useEffect(() => {
-    if (didMount && firebase.auth.currentUser && basket.length !== 0) {
-      firebase.saveBasketItems(basket, firebase.auth.currentUser.uid)
-        .then(() => {
-          console.log('Item saved to basket');
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    }
+    const saveBasket = async () => {
+      if (didMount && firebase.auth.currentUser && basket.length !== 0) {
+        try {
+          await firebase.saveBasketItems(basket, firebase.auth.currentUser.uid);
+          console.log('Items saved to basket');
+        } catch (e) {
+          console.error('Basket save error:', e);
+        }
+      }
+    };
+    
+    saveBasket();
   }, [basket.length]);
 
   const onCheckOut = () => {

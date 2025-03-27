@@ -1,42 +1,90 @@
-import app from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
-import "firebase/storage";
+import { initializeApp } from "firebase/app";
+import { getAuth, 
+         createUserWithEmailAndPassword,
+         signInWithEmailAndPassword,
+         GoogleAuthProvider,
+         FacebookAuthProvider,
+         signInWithPopup,
+         sendPasswordResetEmail,
+         updatePassword,
+         reauthenticateWithCredential,
+         EmailAuthProvider,
+         updateEmail,
+         setPersistence,
+         browserLocalPersistence,
+         onAuthStateChanged } from "firebase/auth";
+import { getFirestore, 
+         collection,
+         doc,
+         getDoc,
+         setDoc,
+         updateDoc,
+         query,
+         where,
+         orderBy,
+         startAfter,
+         limit,
+         getDocs,
+         or,
+         and  } from "firebase/firestore";
+import { getStorage, 
+         ref, 
+         uploadBytes, 
+         getDownloadURL,
+         deleteObject } from "firebase/storage";
 import firebaseConfig from "./config";
 
 class Firebase {
   constructor() {
-    app.initializeApp(firebaseConfig);
-
-    this.storage = app.storage();
-    this.db = app.firestore();
-    this.auth = app.auth();
+    this.app = initializeApp(firebaseConfig);
+    this.auth = getAuth(this.app);
+    this.db = getFirestore(this.app);
+    this.storage = getStorage(this.app);
   }
 
   // AUTH ACTIONS ------------
+  createAccount = (email, password) => 
+    createUserWithEmailAndPassword(this.auth, email, password);
 
-  createAccount = (email, password) =>
-    this.auth.createUserWithEmailAndPassword(email, password);
+  signIn = (email, password) => 
+    signInWithEmailAndPassword(this.auth, email, password);
 
-  signIn = (email, password) =>
-    this.auth.signInWithEmailAndPassword(email, password);
+  signInWithGoogle = () => 
+    signInWithPopup(this.auth, new GoogleAuthProvider());
 
-  signInWithGoogle = () =>
-    this.auth.signInWithPopup(new app.auth.GoogleAuthProvider());
-
-  signInWithFacebook = () =>
-    this.auth.signInWithPopup(new app.auth.FacebookAuthProvider());
+  signInWithFacebook = () => 
+    signInWithPopup(this.auth, new FacebookAuthProvider());
 
   signOut = () => this.auth.signOut();
 
-  passwordReset = (email) => this.auth.sendPasswordResetEmail(email);
+  passwordReset = (email) => sendPasswordResetEmail(this.auth, email);
+
+  passwordUpdate = (password) =>
+    updatePassword(this.auth.currentUser, password);
+
+  reauthenticate = (currentPassword) => {
+    const credential = EmailAuthProvider.credential(
+      this.auth.currentUser.email,
+      currentPassword
+    );
+    return reauthenticateWithCredential(this.auth.currentUser, credential);
+  };
+
+  updateEmail = (newEmail) =>
+    updateEmail(this.auth.currentUser, newEmail);
+
+  setAuthPersistence = () =>
+    setPersistence(this.auth, browserLocalPersistence);
 
   addUser = (id, user) => this.db.collection("users").doc(id).set(user);
 
   getUser = (id) => this.db.collection("users").doc(id).get();
 
-  passwordUpdate = (password) => this.auth.currentUser.updatePassword(password);
+  updateProfile = (id, updates) => 
+    updateDoc(doc(this.db, "users", id), updates);
 
+
+  
   changePassword = (currentPassword, newPassword) =>
     new Promise((resolve, reject) => {
       this.reauthenticate(currentPassword)
@@ -92,170 +140,153 @@ class Firebase {
     });
 
   saveBasketItems = (items, userId) =>
-    this.db.collection("users").doc(userId).update({ basket: items });
+    updateDoc(doc(this.db, "users", userId), { basket: items });
+
+  onAuthStateChanged = (callback) =>
+    onAuthStateChanged(this.auth, callback);
 
   setAuthPersistence = () =>
     this.auth.setPersistence(app.auth.Auth.Persistence.LOCAL);
 
   // // PRODUCT ACTIONS --------------
 
-  getSingleProduct = (id) => this.db.collection("products").doc(id).get();
+  getSingleProduct = (id) => getDoc(doc(this.db, "products", id));
 
-  getProducts = (lastRefKey) => {
-    let didTimeout = false;
+  getProducts = async (lastRefKey) => {
+    try {
+      const productsRef = collection(this.db, "products");
+      let q = query(
+        productsRef,
+        orderBy("dateAdded", "desc"),
+        limit(12)
+      );
 
-    return new Promise((resolve, reject) => {
-      (async () => {
-        if (lastRefKey) {
-          try {
-            const query = this.db
-              .collection("products")
-              .orderBy(app.firestore.FieldPath.documentId())
-              .startAfter(lastRefKey)
-              .limit(12);
+      if (lastRefKey) {
+        q = query(q, startAfter(lastRefKey));
+      }
 
-            const snapshot = await query.get();
-            const products = [];
-            snapshot.forEach((doc) =>
-              products.push({ id: doc.id, ...doc.data() })
-            );
-            const lastKey = snapshot.docs[snapshot.docs.length - 1];
-
-            resolve({ products, lastKey });
-          } catch (e) {
-            reject(e?.message || ":( Failed to fetch products.");
-          }
-        } else {
-          const timeout = setTimeout(() => {
-            didTimeout = true;
-            reject(new Error("Request timeout, please try again"));
-          }, 15000);
-
-          try {
-            const totalQuery = await this.db.collection("products").get();
-            const total = totalQuery.docs.length;
-            const query = this.db
-              .collection("products")
-              .orderBy(app.firestore.FieldPath.documentId())
-              .limit(12);
-            const snapshot = await query.get();
-
-            clearTimeout(timeout);
-            if (!didTimeout) {
-              const products = [];
-              snapshot.forEach((doc) =>
-                products.push({ id: doc.id, ...doc.data() })
-              );
-              const lastKey = snapshot.docs[snapshot.docs.length - 1];
-
-              resolve({ products, lastKey, total });
-            }
-          } catch (e) {
-            if (didTimeout) return;
-            reject(e?.message || ":( Failed to fetch products.");
-          }
-        }
-      })();
-    });
+      const snapshot = await getDocs(q);
+      const products = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      
+      return {
+        products,
+        lastKey: snapshot.docs[snapshot.docs.length - 1],
+        total: (await getDocs(productsRef)).size
+      };
+    } catch (error) {
+      throw new Error(error.message || "Failed to fetch products");
+    }
   };
 
-  searchProducts = (searchKey) => {
-    let didTimeout = false;
+  searchProducts = async (searchKey) => {
     const searchTerm = searchKey.toLowerCase().trim();
+    const searchWords = searchTerm.split(/[\s-]+/g).filter(w => w.length > 2);
   
-    return new Promise((resolve, reject) => {
-      (async () => {
-        const productsRef = this.db.collection("products");
-        const timeout = setTimeout(() => {
-          didTimeout = true;
-          reject(new Error("Request timeout, please try again"));
-        }, 15000);
+    try {
+      const productsRef = collection(this.db, "products");
+      const queries = [];
+      
+      // Separate queries for each search field
+      if (searchTerm.length > 0) {
+        // Name search
+        queries.push(query(
+          productsRef,
+          where("name_lower", ">=", searchTerm),
+          where("name_lower", "<=", searchTerm + '\uf8ff'),
+          limit(25)
+        ));
   
-        try {
-          const searchWords = searchTerm.split(/[\s-]+/g).filter(w => w.length > 2);
-          
-          // Create separate queries for each search condition
-          const queries = [
-            // Name search
-            productsRef.where("name_lower", ">=", searchTerm)
-                      .where("name_lower", "<=", searchTerm + "\uf8ff"),
-            
-            // Brand search
-            productsRef.where("brand_lower", ">=", searchTerm)
-                      .where("brand_lower", "<=", searchTerm + "\uf8ff"),
-            
-            // Description search
-            productsRef.where("description_lower", ">=", searchTerm)
-                      .where("description_lower", "<=", searchTerm + "\uf8ff"),
-            
-            // Keywords search
-            productsRef.where("keywords", "array-contains-any", searchWords)
-          ];
+        // Brand search
+        queries.push(query(
+          productsRef,
+          where("brand_lower", ">=", searchTerm),
+          where("brand_lower", "<=", searchTerm + '\uf8ff'),
+          limit(25)
+        ));
   
-          // Execute all queries in parallel
-          const snapshots = await Promise.all(queries.map(q => q.limit(25).get()));
-          
-          // Merge and deduplicate results
-          const mergedProducts = [];
-          const seenIds = new Set();
+        // Description search
+        queries.push(query(
+          productsRef,
+          where("description_lower", ">=", searchTerm),
+          where("description_lower", "<=", searchTerm + '\uf8ff'),
+          limit(25)
+        ));
+      }
   
-          snapshots.forEach(snapshot => {
-            snapshot.forEach(doc => {
-              if (!seenIds.has(doc.id)) {
-                seenIds.add(doc.id);
-                mergedProducts.push({ id: doc.id, ...doc.data() });
-              }
-            });
-          });
+      // Keywords search
+      if (searchWords.length > 0) {
+        queries.push(query(
+          productsRef,
+          where("keywords", "array-contains-any", searchWords),
+          limit(25)
+        ));
+      }
   
-          clearTimeout(timeout);
-          if (!didTimeout) {
-            resolve({
-              products: mergedProducts,
-              total: mergedProducts.length,
-              lastKey: null
-            });
+      // Execute all queries in parallel
+      const snapshots = await Promise.all(queries.map(q => getDocs(q)));
+      
+      // Merge and deduplicate results
+      const mergedProducts = [];
+      const seenIds = new Set();
+  
+      snapshots.forEach(snapshot => {
+        snapshot.forEach(doc => {
+          if (!seenIds.has(doc.id)) {
+            seenIds.add(doc.id);
+            mergedProducts.push({ id: doc.id, ...doc.data() });
           }
-        } catch (e) {
-          if (didTimeout) return;
-          reject(e);
-        }
-      })();
-    });
+        });
+      });
+  
+      return {
+        products: mergedProducts,
+        total: mergedProducts.length,
+        lastKey: null
+      };
+    } catch (error) {
+      throw new Error(error.message || "Search failed");
+    }
   };
 
-  getFeaturedProducts = (itemsCount = 12) =>
-    this.db
-      .collection("products")
-      .where("isFeatured", "==", true)
-      .limit(itemsCount)
-      .get();
+  getFeaturedProducts = async (itemsCount = 12) => {
+    const q = query(
+      collection(this.db, "products"),
+      where("isFeatured", "==", true),
+      limit(itemsCount)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
 
-  getRecommendedProducts = (itemsCount = 12) =>
-    this.db
-      .collection("products")
-      .where("isRecommended", "==", true)
-      .limit(itemsCount)
-      .get();
+  getRecommendedProducts = async (itemsCount = 12) => {
+    const q = query(
+      collection(this.db, "products"),
+      where("isRecommended", "==", true),
+      limit(itemsCount)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
 
   addProduct = (id, product) =>
-    this.db.collection("products").doc(id).set(product);
+    setDoc(doc(this.db, "products", id), product);
 
-  generateKey = () => this.db.collection("products").doc().id;
+  generateKey = () => doc(collection(this.db, "products")).id;
 
   storeImage = async (id, folder, imageFile) => {
-    const snapshot = await this.storage.ref(folder).child(id).put(imageFile);
-    const downloadURL = await snapshot.ref.getDownloadURL();
-
-    return downloadURL;
+    const storageRef = ref(this.storage, `${folder}/${id}`);
+    await uploadBytes(storageRef, imageFile);
+    return getDownloadURL(storageRef);
   };
 
-  deleteImage = (id) => this.storage.ref("products").child(id).delete();
+  deleteImage = (id) => 
+    deleteObject(ref(this.storage, `products/${id}`));
 
   editProduct = (id, updates) =>
-    this.db.collection("products").doc(id).update(updates);
+    updateDoc(doc(this.db, "products", id), updates);
 
-  removeProduct = (id) => this.db.collection("products").doc(id).delete();
+  removeProduct = (id) =>
+    deleteDoc(doc(this.db, "products", id));
 }
 
 const firebaseInstance = new Firebase();
